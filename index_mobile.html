@@ -228,20 +228,6 @@
       requestAnimationFrame(draw);
     }
 
-    document.addEventListener("keydown", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = true;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = true;
-      if (e.key === "ArrowLeft") ball.dx -= 1;
-      if (e.key === "ArrowRight") ball.dx += 1;
-    });
-
-    document.addEventListener("keyup", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = false;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = false;
-    });
-
     startBtn.addEventListener("click", () => {
       if (gameStarted) return;
       gameStarted = true;
