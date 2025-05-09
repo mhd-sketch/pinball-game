@@ -21,11 +21,11 @@
       border: 3px solid #fff;
       display: block;
       max-width: 100%;
-      max-height: 70%;
+      max-height: 90%;
     }
     #startBtn {
       position: absolute;
-      top: 250px;
+      top: 30%;
       padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
@@ -38,7 +38,7 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
-      max-width: 300px;
+      max-width: 400px;
       position: absolute;
       bottom: 30px;
       margin-top: 20px;
@@ -73,12 +73,19 @@
     const startBtn = document.getElementById("startBtn");
 
     const aspectRatio = 0.6; // Set the aspect ratio (height/width) of the canvas
-    let canvasWidth = window.innerWidth * 0.9;  // 90% of the window width
-    let canvasHeight = canvasWidth * aspectRatio;
 
-    // Dynamically set canvas size
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    // Dynamically adjust canvas size based on window size
+    function resizeCanvas() {
+      let canvasWidth = window.innerWidth * 0.9; // 90% of the window width
+      let canvasHeight = canvasWidth * aspectRatio;
+
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+    }
+
+    resizeCanvas(); // Initial resizing
+
+    window.addEventListener('resize', resizeCanvas); // Adjust when window resizes
 
     let lives = 3;
     let score = 0;
