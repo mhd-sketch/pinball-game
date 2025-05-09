@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pinball Mini</title>
   <style>
     body {
@@ -13,14 +14,14 @@
       height: 100vh;
       flex-direction: column;
       touch-action: none;
+      overflow: hidden;
     }
     canvas {
       background: #111;
       border: 3px solid #fff;
       display: block;
       max-width: 100%;
-      max-height: 80%;
-      height: auto;
+      max-height: 70%;
     }
     #startBtn {
       position: absolute;
@@ -57,7 +58,7 @@
 </head>
 <body>
   <button id="startBtn">Start Game</button>
-  <canvas id="game" width="300" height="500"></canvas>
+  <canvas id="game"></canvas>
 
   <div class="mobile-controls">
     <button ontouchstart="flippers.left.pressed = true;" ontouchend="flippers.left.pressed = false;">Left</button>
@@ -71,6 +72,14 @@
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
 
+    const aspectRatio = 0.6; // Set the aspect ratio (height/width) of the canvas
+    let canvasWidth = window.innerWidth * 0.9;  // 90% of the window width
+    let canvasHeight = canvasWidth * aspectRatio;
+
+    // Dynamically set canvas size
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
     let lives = 3;
     let score = 0;
     let running = false;
@@ -78,14 +87,14 @@
     let gameStarted = false;
 
     const ball = {
-      x: 150,
-      y: 250,
-      radius: 12,
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: canvas.width * 0.04, // Relative to canvas width
       dx: 5,
       dy: 7,
       reset() {
-        this.x = 150;
-        this.y = 250;
+        this.x = canvas.width / 2;
+        this.y = canvas.height / 2;
         this.dx = 5 * (Math.random() < 0.5 ? -1 : 1);
         this.dy = -7;
       }
@@ -97,7 +106,7 @@
     const flippers = {
       left: {
         x: flipperLength / 2,
-        y: 460,
+        y: canvas.height - 40,
         angle: 0,
         pressed: false,
         width: flipperLength,
@@ -105,7 +114,7 @@
       },
       right: {
         x: canvas.width - flipperLength / 2,
-        y: 460,
+        y: canvas.height - 40,
         angle: 0,
         pressed: false,
         width: flipperLength,
@@ -114,9 +123,9 @@
     };
 
     const bumpers = [
-      { x: 75, y: 190, radius: 15, lit: false, timer: null },
-      { x: 150, y: 110, radius: 15, lit: false, timer: null },
-      { x: 225, y: 190, radius: 15, lit: false, timer: null }
+      { x: canvas.width * 0.25, y: canvas.height * 0.38, radius: canvas.width * 0.05, lit: false, timer: null },
+      { x: canvas.width / 2, y: canvas.height * 0.22, radius: canvas.width * 0.05, lit: false, timer: null },
+      { x: canvas.width * 0.75, y: canvas.height * 0.38, radius: canvas.width * 0.05, lit: false, timer: null }
     ];
 
     function drawBall() {
@@ -150,11 +159,11 @@
       ctx.fillStyle = "#fff";
       ctx.font = "14px sans-serif";
       ctx.fillText(`Score: ${score}`, 10, 20);
-      ctx.fillText(`Lives: ${lives}`, 230, 20);
+      ctx.fillText(`Lives: ${lives}`, canvas.width - 90, 20);
       if (gameOver) {
         ctx.fillStyle = "#f00";
         ctx.font = "20px sans-serif";
-        ctx.fillText("GAME OVER", 85, 250);
+        ctx.fillText("GAME OVER", canvas.width / 4, canvas.height / 2);
       }
     }
 
