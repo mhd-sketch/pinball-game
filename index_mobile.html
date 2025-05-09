@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pinball Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    canvas {
+      background: #111;
+      border: 2px solid #fff;
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      touch-action: none;
+    }
+    .mobile-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      max-width: 300px;
+      width: 100%;
+    }
+    .mobile-controls button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      background: #222;
+      color: #fff;
+      font-weight: bold;
+    }
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      flex-direction: column;
+    }
+    #scoreDisplay {
+      color: white;
+      font-size: 14px;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    #livesDisplay {
+      color: white;
+      font-size: 14px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="300" height="500"></canvas>
+  <div id="scoreDisplay">Score: 0</div>
+  <div id="livesDisplay">Lives: 3</div>
+  <div id="overlay">
+    <button onclick="startGame()">Click to Start</button>
+  </div>
+
+  <div class="mobile-controls">
+    <button ontouchstart="leftFlipper = true;" ontouchend="leftFlipper = false;">Left</button>
+    <button ontouchstart="nudge(-1)">Nudge Left</button>
+    <button ontouchstart="nudge(1)">Nudge Right</button>
+    <button ontouchstart="rightFlipper = true;" ontouchend="rightFlipper = false;">Right</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let ball = { x: 150, y: 250, radius: 8, dx: 2, dy: -4 };
+    let score = 0;
+    let lives = 3;
+    let leftFlipper = false;
+    let rightFlipper = false;
+    let isGameRunning = false;
+
+    const bumpers = [
+      { x: 50, y: 100, r: 15, lit: false },
+      { x: 150, y: 70, r: 15, lit: false },
+      { x: 250, y: 100, r: 15, lit: false },
+      { x: 75, y: 400, r: 15, lit: false },
+      { x: 225, y: 400, r: 15, lit: false }
+    ];
+
+    function startGame() {
+      document.getElementById("overlay").style.display = "none";
+      isGameRunning = true;
+      resetBall();
+      requestAnimationFrame(update);
+    }
+
+    function resetBall() {
+      ball.x = 150;
+      ball.y = 250;
+      ball.dx = 2 * (Math.random() < 0.5 ? -1 : 1);
+      ball.dy = -4;
+    }
+
+    function nudge(direction) {
+      ball.dx += 0.5 * direction;
+    }
+
+    function drawFlippers() {
+      ctx.fillStyle = "white";
+      const flipperLength = 40;
+      ctx.fillRect(70, 470, flipperLength, 5); // left
+      ctx.fillRect(190, 470, flipperLength, 5); // right
+    }
+
+    function drawBumpers() {
+      bumpers.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = b.lit ? "yellow" : "red";
+        ctx.fill();
+        ctx.closePath();
+        b.lit = false;
+      });
+    }
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function checkCollisions() {
+      // Wall collisions
+      if (ball.x + ball.dx < ball.radius || ball.x + ball.dx > canvas.width - ball.radius)
+        ball.dx = -ball.dx;
+      if (ball.y + ball.dy < ball.radius)
+        ball.dy = -ball.dy;
+
+      // Bottom (lose life)
+      if (ball.y + ball.dy > canvas.height - ball.radius) {
+        lives--;
+        updateLives();
+        if (lives <= 0) {
+          isGameRunning = false;
+        } else {
+          resetBall();
+        }
+      }
+
+      // Bumper collisions
+      bumpers.forEach(b => {
+        const dx = ball.x - b.x;
+        const dy = ball.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < ball.radius + b.r) {
+          ball.dy = -ball.dy;
+          score += 10;
+          b.lit = true;
+          updateScore();
+        }
+      });
+    }
+
+    function updateScore() {
+      document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
+    }
+
+    function updateLives() {
+      document.getElementById("livesDisplay").innerText = `Lives: ${lives}`;
+    }
+
+    function update() {
+      if (!isGameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawBumpers();
+      drawFlippers();
+      drawBall();
+
+      checkCollisions();
+
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      requestAnimationFrame(update);
+    }
+  </script>
+</body>
+</html>
