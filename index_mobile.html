@@ -49,6 +49,14 @@
   </style>
 </head>
 <body>
+
+<div class="mobile-controls">
+  <button ontouchstart="leftFlipper = true;" ontouchend="leftFlipper = false;">Left</button>
+  <button ontouchstart="nudge(-1)">Nudge Left</button>
+  <button ontouchstart="nudge(1)">Nudge Right</button>
+  <button ontouchstart="rightFlipper = true;" ontouchend="rightFlipper = false;">Right</button>
+</div>
+  
   <button id="startBtn">Start Game</button>
   <canvas id="game" width="300" height="500"></canvas>
 
