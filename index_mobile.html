@@ -21,7 +21,7 @@
       border: 3px solid #fff;
       display: block;
       max-width: 100%;
-      max-height: 90%;
+      max-height: 100%;
     }
     #startBtn {
       position: absolute;
@@ -72,13 +72,16 @@
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
 
-    const aspectRatio = 0.6; // Set the aspect ratio (height/width) of the canvas
+    const aspectRatio = 0.6; // Aspect ratio (height/width) for the game
 
-    // Dynamically adjust canvas size based on window size
     function resizeCanvas() {
-      let canvasWidth = window.innerWidth * 0.9; // 90% of the window width
+      const maxWidth = window.innerWidth * 0.9;  // Make the game 90% of the screen width
+      const maxHeight = window.innerHeight * 0.8; // Make the game 80% of the screen height
+
+      let canvasWidth = Math.min(maxWidth, maxHeight / aspectRatio);
       let canvasHeight = canvasWidth * aspectRatio;
 
+      // Apply the new dimensions
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
     }
