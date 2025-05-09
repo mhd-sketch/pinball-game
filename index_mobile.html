@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,212 +41,146 @@
       color: #fff;
       font-weight: bold;
     }
+    #scoreDisplay {
+      color: white;
+      font-size: 14px;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    #livesDisplay {
+      color: white;
+      font-size: 14px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="300" height="500"></canvas>
+  <div id="scoreDisplay">Score: 0</div>
+  <div id="livesDisplay">Lives: 3</div>
 
   <div class="mobile-controls">
-    <button onclick="leftFlipper = true; setTimeout(() => leftFlipper = false, 100)">Left</button>
-    <button onclick="nudge(-1);">Nudge Left</button>
-    <button onclick="nudge(1);">Nudge Right</button>
-    <button onclick="rightFlipper = true; setTimeout(() => rightFlipper = false, 100)">Right</button>
+    <button ontouchstart="leftFlipper = true;" ontouchend="leftFlipper = false;">Left</button>
+    <button ontouchstart="nudge(-1)">Nudge Left</button>
+    <button ontouchstart="nudge(1)">Nudge Right</button>
+    <button ontouchstart="rightFlipper = true;" ontouchend="rightFlipper = false;">Right</button>
   </div>
 
   <script>
-    const canvas = document.getElementById("game");
+    const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const startBtn = document.getElementById("startBtn");
 
-    let lives = 3;
+    let ball = { x: 150, y: 250, radius: 8, dx: 2, dy: -4 };
     let score = 0;
-    let running = false;
-    let gameOver = false;
-    let gameStarted = false;
-
-    const ball = {
-      x: 150,
-      y: 250,
-      radius: 12,
-      dx: 5,
-      dy: 7,
-      reset() {
-        this.x = 150;
-        this.y = 250;
-        this.dx = 5 * (Math.random() < 0.5 ? -1 : 1);
-        this.dy = -7;
-      }
-    };
-
-    const flipperGap = ball.radius * 8;
-    const flipperLength = (canvas.width - flipperGap) / 2;
-
-    const flippers = {
-      left: {
-        x: flipperLength / 2,
-        y: 460,
-        angle: 0,
-        pressed: false,
-        width: flipperLength,
-        height: 10
-      },
-      right: {
-        x: canvas.width - flipperLength / 2,
-        y: 460,
-        angle: 0,
-        pressed: false,
-        width: flipperLength,
-        height: 10
-      }
-    };
+    let lives = 3;
+    let leftFlipper = false;
+    let rightFlipper = false;
+    let isGameRunning = true;
 
     const bumpers = [
-      { x: 75, y: 190, radius: 15, lit: false, timer: null },
-      { x: 150, y: 110, radius: 15, lit: false, timer: null },
-      { x: 225, y: 190, radius: 15, lit: false, timer: null }
+      { x: 50, y: 100, r: 15, lit: false },
+      { x: 150, y: 70, r: 15, lit: false },
+      { x: 250, y: 100, r: 15, lit: false },
+      { x: 75, y: 420, r: 15, lit: false },
+      { x: 225, y: 420, r: 15, lit: false }
     ];
 
-    function drawBall() {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "#0ff";
-      ctx.fill();
-      ctx.closePath();
+    function resetBall() {
+      ball.x = 150;
+      ball.y = 250;
+      ball.dx = 2 * (Math.random() < 0.5 ? -1 : 1);
+      ball.dy = -4;
     }
 
-    function drawFlipper(f, isLeft) {
-      ctx.save();
-      ctx.translate(f.x, f.y);
-      ctx.rotate(isLeft ? -f.angle : f.angle);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(-f.width / 2, -f.height / 2, f.width, f.height);
-      ctx.restore();
+    function nudge(direction) {
+      ball.dx += 0.5 * direction;
+    }
+
+    function drawFlippers() {
+      ctx.fillStyle = "white";
+      const flipperLength = 40;
+      ctx.fillRect(65, 470, flipperLength, 5); // left
+      ctx.fillRect(195, 470, flipperLength, 5); // right
     }
 
     function drawBumpers() {
       bumpers.forEach(b => {
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-        ctx.fillStyle = b.lit ? "#ff0" : "#f00";
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = b.lit ? "yellow" : "red";
         ctx.fill();
         ctx.closePath();
+        b.lit = false;
       });
     }
 
-    function drawHUD() {
-      ctx.fillStyle = "#fff";
-      ctx.font = "14px sans-serif";
-      ctx.fillText(`Score: ${score}`, 10, 20);
-      ctx.fillText(`Lives: ${lives}`, 230, 20);
-      if (gameOver) {
-        ctx.fillStyle = "#f00";
-        ctx.font = "20px sans-serif";
-        ctx.fillText("GAME OVER", 85, 250);
-      }
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.closePath();
     }
 
-    function moveBall() {
-      ball.x += ball.dx;
-      ball.y += ball.dy;
+    function checkCollisions() {
+      if (ball.x + ball.dx < ball.radius || ball.x + ball.dx > canvas.width - ball.radius)
+        ball.dx = -ball.dx;
+      if (ball.y + ball.dy < ball.radius)
+        ball.dy = -ball.dy;
 
-      if (ball.x < ball.radius || ball.x > canvas.width - ball.radius)
-        ball.dx *= -1;
-      if (ball.y < ball.radius)
-        ball.dy *= -1;
+      if (ball.y + ball.dy > canvas.height - ball.radius) {
+        lives--;
+        updateLives();
+        if (lives <= 0) {
+          isGameRunning = false;
+          return;
+        } else {
+          resetBall();
+        }
+      }
 
       bumpers.forEach(b => {
         const dx = ball.x - b.x;
         const dy = ball.y - b.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < ball.radius + b.radius) {
-          const angle = Math.atan2(dy, dx);
-          ball.dx = Math.cos(angle) * 6;
-          ball.dy = Math.sin(angle) * 6;
-          score += 100;
+        if (dist < ball.radius + b.r) {
+          ball.dy = -ball.dy;
+          score += 10;
           b.lit = true;
-          if (b.timer) clearTimeout(b.timer);
-          b.timer = setTimeout(() => { b.lit = false; }, 200);
+          updateScore();
         }
-      });
-
-      const flipperBounce = (f, isLeft) => {
-        const dx = ball.x - f.x;
-        const dy = ball.y - f.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < f.width / 2 + ball.radius && ball.y > f.y - 20 && ball.y < f.y + 20) {
-          ball.dy = -Math.abs(ball.dy);
-          ball.dx += isLeft ? -1 : 1;
-        }
-      };
-
-      flipperBounce(flippers.left, true);
-      flipperBounce(flippers.right, false);
-
-      if (ball.y > canvas.height + ball.radius) {
-        lives--;
-        if (lives > 0) {
-          ball.reset();
-        } else {
-          running = false;
-          gameOver = true;
-        }
-      }
-    }
-
-    function updateFlippers() {
-      if (!running) return;
-      const speed = 0.1;
-      const maxAngle = 0.8;
-      ["left", "right"].forEach(key => {
-        let f = flippers[key];
-        if (f.pressed && f.angle < maxAngle) f.angle += speed;
-        if (!f.pressed && f.angle > 0) f.angle -= speed;
       });
     }
 
-    function draw() {
+    function updateScore() {
+      document.getElementById("scoreDisplay").innerText = `Score: ${score}`;
+    }
+
+    function updateLives() {
+      document.getElementById("livesDisplay").innerText = `Lives: ${lives}`;
+    }
+
+    function update() {
+      if (!isGameRunning) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (running) {
-        moveBall();
-      }
-
-      drawBall();
-      drawFlipper(flippers.left, true);
-      drawFlipper(flippers.right, false);
       drawBumpers();
-      drawHUD();
-      updateFlippers();
+      drawFlippers();
+      drawBall();
 
-      requestAnimationFrame(draw);
+      checkCollisions();
+
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+
+      requestAnimationFrame(update);
     }
 
-    document.addEventListener("keydown", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = true;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = true;
-      if (e.key === "ArrowLeft") ball.dx -= 1;
-      if (e.key === "ArrowRight") ball.dx += 1;
-    });
-
-    document.addEventListener("keyup", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = false;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = false;
-    });
-
-    startBtn.addEventListener("click", () => {
-      if (gameStarted) return;
-      gameStarted = true;
-      lives = 3;
-      score = 0;
-      gameOver = false;
-      ball.reset();
-      running = true;
-      startBtn.style.display = "none";
-    });
-
-    draw();
+    update();
   </script>
 </body>
 </html>
