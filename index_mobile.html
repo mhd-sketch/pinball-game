@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pinball Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    canvas {
+      background: #111;
+      border: 2px solid #fff;
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      touch-action: none;
+    }
+    .mobile-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      max-width: 300px;
+      width: 100%;
+    }
+    .mobile-controls button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      background: #222;
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="300" height="500"></canvas>
+
+  <div class="mobile-controls">
+    <button onclick="leftFlipper = true; setTimeout(() => leftFlipper = false, 100)">Left</button>
+    <button onclick="nudge(-1);">Nudge Left</button>
+    <button onclick="nudge(1);">Nudge Right</button>
+    <button onclick="rightFlipper = true; setTimeout(() => rightFlipper = false, 100)">Right</button>
+  </div>
+
+  <script>
+    // Placeholder for game logic
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let leftFlipper = false;
+    let rightFlipper = false;
+
+    function nudge(direction) {
+      console.log("Nudge:", direction);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+      ctx.font = "20px sans-serif";
+      ctx.fillText("Pinball Game Placeholder", 10, 50);
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
