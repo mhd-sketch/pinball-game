@@ -9,48 +9,54 @@
       margin: 0;
       background: #000;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       flex-direction: column;
-      touch-action: none;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       overflow: hidden;
+      touch-action: none;
     }
+
     canvas {
       background: #111;
       border: 3px solid #fff;
       display: block;
-      max-width: 100%;
-      max-height: 100%;
+      max-height: 90vh;
+      max-width: calc(90vh * 0.6);
+      width: auto;
+      height: auto;
     }
+
     #startBtn {
       position: absolute;
-      top: 30%;
-      padding: 10px 20px;
-      font-size: 18px;
-      cursor: pointer;
+      top: 20%;
+      padding: 12px 24px;
+      font-size: 20px;
       background: #0f0;
       color: #000;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      z-index: 1;
     }
+
     .mobile-controls {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 400px;
       position: absolute;
-      bottom: 30px;
-      margin-top: 20px;
+      bottom: 20px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 20px;
+      z-index: 1;
     }
+
     .mobile-controls button {
       flex: 1;
-      margin: 0 5px;
-      padding: 10px;
+      margin: 0 6px;
+      padding: 14px;
       font-size: 16px;
       border-radius: 10px;
       border: none;
-      background: #222;
+      background: #444;
       color: #fff;
       font-weight: bold;
     }
@@ -58,37 +64,19 @@
 </head>
 <body>
   <button id="startBtn">Start Game</button>
-  <canvas id="game"></canvas>
+  <canvas id="game" width="300" height="500"></canvas>
 
   <div class="mobile-controls">
-    <button ontouchstart="flippers.left.pressed = true;" ontouchend="flippers.left.pressed = false;">Left</button>
+    <button ontouchstart="flippers.left.pressed = true" ontouchend="flippers.left.pressed = false">Left</button>
     <button ontouchstart="nudge(-1)">Nudge Left</button>
     <button ontouchstart="nudge(1)">Nudge Right</button>
-    <button ontouchstart="flippers.right.pressed = true;" ontouchend="flippers.right.pressed = false;">Right</button>
+    <button ontouchstart="flippers.right.pressed = true" ontouchend="flippers.right.pressed = false">Right</button>
   </div>
 
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
-
-    const aspectRatio = 0.6; // Aspect ratio (height/width) for the game
-
-    function resizeCanvas() {
-      const maxWidth = window.innerWidth * 0.9;  // Make the game 90% of the screen width
-      const maxHeight = window.innerHeight * 0.8; // Make the game 80% of the screen height
-
-      let canvasWidth = Math.min(maxWidth, maxHeight / aspectRatio);
-      let canvasHeight = canvasWidth * aspectRatio;
-
-      // Apply the new dimensions
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-    }
-
-    resizeCanvas(); // Initial resizing
-
-    window.addEventListener('resize', resizeCanvas); // Adjust when window resizes
 
     let lives = 3;
     let score = 0;
@@ -97,14 +85,14 @@
     let gameStarted = false;
 
     const ball = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      radius: canvas.width * 0.04, // Relative to canvas width
+      x: 150,
+      y: 250,
+      radius: 12,
       dx: 5,
       dy: 7,
       reset() {
-        this.x = canvas.width / 2;
-        this.y = canvas.height / 2;
+        this.x = 150;
+        this.y = 250;
         this.dx = 5 * (Math.random() < 0.5 ? -1 : 1);
         this.dy = -7;
       }
@@ -116,7 +104,7 @@
     const flippers = {
       left: {
         x: flipperLength / 2,
-        y: canvas.height - 40,
+        y: 460,
         angle: 0,
         pressed: false,
         width: flipperLength,
@@ -124,7 +112,7 @@
       },
       right: {
         x: canvas.width - flipperLength / 2,
-        y: canvas.height - 40,
+        y: 460,
         angle: 0,
         pressed: false,
         width: flipperLength,
@@ -133,9 +121,9 @@
     };
 
     const bumpers = [
-      { x: canvas.width * 0.25, y: canvas.height * 0.38, radius: canvas.width * 0.05, lit: false, timer: null },
-      { x: canvas.width / 2, y: canvas.height * 0.22, radius: canvas.width * 0.05, lit: false, timer: null },
-      { x: canvas.width * 0.75, y: canvas.height * 0.38, radius: canvas.width * 0.05, lit: false, timer: null }
+      { x: 75, y: 190, radius: 15, lit: false, timer: null },
+      { x: 150, y: 110, radius: 15, lit: false, timer: null },
+      { x: 225, y: 190, radius: 15, lit: false, timer: null }
     ];
 
     function drawBall() {
@@ -169,11 +157,11 @@
       ctx.fillStyle = "#fff";
       ctx.font = "14px sans-serif";
       ctx.fillText(`Score: ${score}`, 10, 20);
-      ctx.fillText(`Lives: ${lives}`, canvas.width - 90, 20);
+      ctx.fillText(`Lives: ${lives}`, 220, 20);
       if (gameOver) {
         ctx.fillStyle = "#f00";
         ctx.font = "20px sans-serif";
-        ctx.fillText("GAME OVER", canvas.width / 4, canvas.height / 2);
+        ctx.fillText("GAME OVER", 85, 250);
       }
     }
 
@@ -239,9 +227,7 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (running) {
-        moveBall();
-      }
+      if (running) moveBall();
 
       drawBall();
       drawFlipper(flippers.left, true);
@@ -253,8 +239,22 @@
       requestAnimationFrame(draw);
     }
 
-    function nudge(direction) {
-      ball.dx += 1 * direction;
+    document.addEventListener("keydown", e => {
+      if (!running) return;
+      if (e.key === "a" || e.key === "A") flippers.left.pressed = true;
+      if (e.key === "d" || e.key === "D") flippers.right.pressed = true;
+      if (e.key === "ArrowLeft") nudge(-1);
+      if (e.key === "ArrowRight") nudge(1);
+    });
+
+    document.addEventListener("keyup", e => {
+      if (!running) return;
+      if (e.key === "a" || e.key === "A") flippers.left.pressed = false;
+      if (e.key === "d" || e.key === "D") flippers.right.pressed = false;
+    });
+
+    function nudge(dir) {
+      ball.dx += dir * 2;
     }
 
     startBtn.addEventListener("click", () => {
