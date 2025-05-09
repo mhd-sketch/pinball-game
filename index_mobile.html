@@ -1,82 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Pinball Mini</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
       background: #000;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      overflow: hidden;
-      touch-action: none;
+    }
+
+    #container {
+      position: relative;
+      width: 90vw;
+      height: calc(90vw / 0.6); /* Maintain 300x500 ratio */
+      max-height: 90vh;
+      max-width: calc(90vh * 0.6);
     }
 
     canvas {
+      width: 100%;
+      height: 100%;
       background: #111;
       border: 3px solid #fff;
       display: block;
-      max-height: 90vh;
-      max-width: calc(90vh * 0.6);
-      width: auto;
-      height: auto;
+    }
+
+    #controls {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     #startBtn {
       position: absolute;
-      top: 20%;
-      padding: 12px 24px;
-      font-size: 20px;
-      background: #0f0;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      z-index: 1;
-    }
-
-    .mobile-controls {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      padding: 0 20px;
-      z-index: 1;
-    }
-
-    .mobile-controls button {
-      flex: 1;
-      margin: 0 6px;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      background: #444;
-      color: #fff;
-      font-weight: bold;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
     }
   </style>
 </head>
 <body>
-  <button id="startBtn">Start Game</button>
-  <canvas id="game" width="300" height="500"></canvas>
+  <div id="container">
+    <button id="startBtn" class="btn">Start Game</button>
+    <canvas id="game" width="300" height="500"></canvas>
+  </div>
 
-  <div class="mobile-controls">
-    <button ontouchstart="flippers.left.pressed = true" ontouchend="flippers.left.pressed = false">Left</button>
-    <button ontouchstart="nudge(-1)">Nudge Left</button>
-    <button ontouchstart="nudge(1)">Nudge Right</button>
-    <button ontouchstart="flippers.right.pressed = true" ontouchend="flippers.right.pressed = false">Right</button>
+  <div id="controls">
+    <button id="leftBtn" class="btn">Left</button>
+    <button id="tiltBtn" class="btn">Tilt</button>
+    <button id="rightBtn" class="btn">Right</button>
   </div>
 
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+    const tiltBtn = document.getElementById("tiltBtn");
 
     let lives = 3;
     let score = 0;
@@ -98,7 +97,7 @@
       }
     };
 
-    const flipperGap = ball.radius * 8;
+    const flipperGap = ball.radius * 10;
     const flipperLength = (canvas.width - flipperGap) / 2;
 
     const flippers = {
@@ -157,7 +156,7 @@
       ctx.fillStyle = "#fff";
       ctx.font = "14px sans-serif";
       ctx.fillText(`Score: ${score}`, 10, 20);
-      ctx.fillText(`Lives: ${lives}`, 220, 20);
+      ctx.fillText(`Lives: ${lives}`, 230, 20);
       if (gameOver) {
         ctx.fillStyle = "#f00";
         ctx.font = "20px sans-serif";
@@ -226,35 +225,14 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       if (running) moveBall();
-
       drawBall();
       drawFlipper(flippers.left, true);
       drawFlipper(flippers.right, false);
       drawBumpers();
       drawHUD();
       updateFlippers();
-
       requestAnimationFrame(draw);
-    }
-
-    document.addEventListener("keydown", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = true;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = true;
-      if (e.key === "ArrowLeft") nudge(-1);
-      if (e.key === "ArrowRight") nudge(1);
-    });
-
-    document.addEventListener("keyup", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = false;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = false;
-    });
-
-    function nudge(dir) {
-      ball.dx += dir * 2;
     }
 
     startBtn.addEventListener("click", () => {
@@ -267,6 +245,15 @@
       running = true;
       startBtn.style.display = "none";
     });
+
+    // Mobile buttons
+    leftBtn.addEventListener("touchstart", () => { flippers.left.pressed = true; });
+    leftBtn.addEventListener("touchend", () => { flippers.left.pressed = false; });
+
+    rightBtn.addEventListener("touchstart", () => { flippers.right.pressed = true; });
+    rightBtn.addEventListener("touchend", () => { flippers.right.pressed = false; });
+
+    tiltBtn.addEventListener("touchstart", () => { ball.dx += (Math.random() - 0.5) * 4; });
 
     draw();
   </script>
