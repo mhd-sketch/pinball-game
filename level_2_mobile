@@ -3,30 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <title>Pinball Mini</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+<style>
+
+<script>
+  // Spinner setup
+  const spinner = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    length: 80,
+    thickness: 6,
+    angle: 0,
+    speed: 0.1
+  };
+
+  function drawSpinner() {
+    ctx.save();
+    ctx.translate(spinner.x, spinner.y);
+    ctx.rotate(spinner.angle);
+    ctx.fillStyle = "#0f0";
+    ctx.fillRect(-spinner.length / 2, -spinner.thickness / 2, spinner.length, spinner.thickness);
+    ctx.restore();
+  }
+
+  function updateSpinner() {
+    spinner.angle += spinner.speed;
+    // Collision detection with ball
+    const dx = ball.x - spinner.x;
+    const dy = ball.y - spinner.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < spinner.length / 2 + ball.radius && Math.abs(dy) < spinner.thickness * 2) {
+      const angle = Math.atan2(dy, dx);
+      ball.dx = Math.cos(angle) * 6;
+      ball.dy = Math.sin(angle) * 6;
+      score += 50;
     }
+  }
+
+  // Modify draw() to include spinner
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (running) {
+      moveBall();
+      updateSpinner();
+    }
+    drawBall();
+    drawFlipper(flippers.left, true);
+    drawFlipper(flippers.right, false);
+    drawBumpers();
+    drawSpinner();
+    drawHUD();
+    updateFlippers();
+    requestAnimationFrame(draw);
+  }
+</script>
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation; /* Prevent double-tap zoom */
+    }
+
+    #container {
+      position: relative;
+      width: 90vw;
+      height: calc(90vw / 0.6); /* Maintain 300x500 aspect ratio */
+      max-height: 90vh;
+      max-width: calc(90vh * 0.6);
+    }
+
     canvas {
+      width: 100%;
+      height: 100%;
       background: #111;
       border: 3px solid #fff;
       display: block;
     }
-    #startBtn {
-      position: absolute;
-      top: 250px;
-      padding: 10px 20px;
-      font-size: 18px;
-      cursor: pointer;
+
+    #controls {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 600px;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      flex: 1;
+      margin: 0 4px;
+      padding: 12px 0;
+      font-size: 16px;
       background: #0f0;
       color: #000;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #startBtn {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      padding: 12px 24px;
+      font-size: 18px;
     }
   </style>
 </head>
