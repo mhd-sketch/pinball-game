@@ -122,13 +122,27 @@
   </style>
 </head>
 <body>
-  <button id="startBtn">Start Game</button>
-  <canvas id="game" width="300" height="500"></canvas>
+  <div id="container">
+    <button id="startBtn" class="btn">Start Game</button>
+    <canvas id="game" width="300" height="500"></canvas>
+  </div>
 
+  <div id="controls">
+    <button id="leftBtn" class="btn">Left</button>
+    <button id="tiltLeftBtn" class="btn">Tilt L</button>
+    <button id="tiltRightBtn" class="btn">Tilt R</button>
+    <button id="rightBtn" class="btn">Right</button>
+  </div>
+  
   <script>
-    const canvas = document.getElementById("game");
+ const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
+
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+    const tiltLeftBtn = document.getElementById("tiltLeftBtn");
+    const tiltRightBtn = document.getElementById("tiltRightBtn");
 
     let lives = 3;
     let score = 0;
@@ -328,21 +342,7 @@
       requestAnimationFrame(draw);
     }
 
-    document.addEventListener("keydown", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = true;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = true;
-      if (e.key === "ArrowLeft") ball.dx -= 1;
-      if (e.key === "ArrowRight") ball.dx += 1;
-    });
-
-    document.addEventListener("keyup", e => {
-      if (!running) return;
-      if (e.key === "a" || e.key === "A") flippers.left.pressed = false;
-      if (e.key === "d" || e.key === "D") flippers.right.pressed = false;
-    });
-
-    startBtn.addEventListener("click", () => {
+      startBtn.addEventListener("click", () => {
       if (gameStarted) return;
       gameStarted = true;
       lives = 3;
@@ -352,6 +352,16 @@
       running = true;
       startBtn.style.display = "none";
     });
+
+     // Touch control bindings
+    leftBtn.addEventListener("touchstart", () => flippers.left.pressed = true);
+    leftBtn.addEventListener("touchend", () => flippers.left.pressed = false);
+
+    rightBtn.addEventListener("touchstart", () => flippers.right.pressed = true);
+    rightBtn.addEventListener("touchend", () => flippers.right.pressed = false);
+
+    tiltLeftBtn.addEventListener("touchstart", () => { ball.dx -= 2; });
+    tiltRightBtn.addEventListener("touchstart", () => { ball.dx += 2; });
 
     draw();
   </script>
