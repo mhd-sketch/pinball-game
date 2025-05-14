@@ -5,7 +5,7 @@
 <script>
   // Basic mobile device detection
   if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-    window.location.href = "index_mobile.html";
+    window.location.href = "level_2_mobile.html";
   }
 </script>
   
@@ -53,6 +53,16 @@
     let gameOver = false;
     let gameStarted = false;
 
+//SPINNER
+    const spinner = {
+  x: width / 2,
+  y: height / 1.7,
+  length: 50,
+  thickness: 8,
+  angle: 0,
+  speed: 0.05
+};
+    
     const ball = {
       x: 150,
       y: 250,
@@ -208,7 +218,23 @@
       updateFlippers();
 
       requestAnimationFrame(draw);
+  //SPINNER ANIMATION
+      drawSpinner();
+spinner.angle += spinner.speed;
     }
+
+    function drawSpinner() {
+  ctx.save();
+  ctx.translate(spinner.x, spinner.y);
+  ctx.rotate(spinner.angle);
+
+  ctx.fillStyle = 'cyan';
+  ctx.fillRect(-spinner.length / 2, -spinner.thickness / 2, spinner.length, spinner.thickness);
+  ctx.fillRect(-spinner.thickness / 2, -spinner.length / 2, spinner.thickness, spinner.length);
+
+  ctx.restore();
+}
+
 
     document.addEventListener("keydown", e => {
       if (!running) return;
