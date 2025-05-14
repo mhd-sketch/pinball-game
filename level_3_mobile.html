@@ -112,11 +112,13 @@
     };
 
     const flipperGap = ball.radius * 10;
-    const flipperLength = (canvas.width - flipperGap) / 2;
+    const gutterSize = 40; // space between wall and flipper
+    const flipperLength = (canvas.width - flipperGap) / 2.5;
 
     const flippers = {
       left: {
         x: flipperLength / 2,
+        x: gutterSize + flipperLength / 2,
         y: 460,
         angle: 0,
         pressed: false,
@@ -124,7 +126,7 @@
         height: 10
       },
       right: {
-        x: canvas.width - flipperLength / 2,
+        x: canvas.width - flipperLength,
         y: 460,
         angle: 0,
         pressed: false,
@@ -139,6 +141,15 @@
       { x: 225, y: 190, radius: 15, lit: false, timer: null }
     ];
 
+    const spinner = {
+      x: canvas.width / 2,
+      y: 300,
+      length: 120,
+      thickness: 6,
+      angle: 0,
+      speed: 0.15
+    };
+    
     function drawBall() {
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -164,6 +175,16 @@
         ctx.fill();
         ctx.closePath();
       });
+    }
+
+    function drawSpinner() {
+      ctx.save();
+      ctx.translate(spinner.x, spinner.y);
+      ctx.rotate(spinner.angle);
+      ctx.fillStyle = "#0f0";
+      ctx.fillRect(-spinner.length / 2, -spinner.thickness / 2, spinner.length, spinner.thickness);
+      ctx.fillRect(-spinner.thickness / 2, -spinner.length / 2, spinner.thickness, spinner.length);
+      ctx.restore();
     }
 
     function drawHUD() {
@@ -201,7 +222,18 @@
           b.timer = setTimeout(() => { b.lit = false; }, 200);
         }
       });
-
+      
+      // Spinner collision
+      const dx = ball.x - spinner.x;
+      const dy = ball.y - spinner.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < spinner.length / 2 + ball.radius) {
+        const angle = Math.atan2(dy, dx);
+        ball.dx = Math.cos(angle) * 6;
+        ball.dy = Math.sin(angle) * 6;
+        score += 150;
+      }
+      
       const flipperBounce = (f, isLeft) => {
         const dx = ball.x - f.x;
         const dy = ball.y - f.y;
@@ -240,10 +272,14 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (running) moveBall();
+
+      spinner.angle += spinner.speed;
+      
       drawBall();
       drawFlipper(flippers.left, true);
       drawFlipper(flippers.right, false);
       drawBumpers();
+      drawSpinner();
       drawHUD();
       updateFlippers();
       requestAnimationFrame(draw);
