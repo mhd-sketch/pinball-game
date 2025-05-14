@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<script>
-  // Basic mobile device detection
-  if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-    window.location.href = "level_2_mobile.html";
-  }
-</script>
-  
   <meta charset="UTF-8">
   <title>Pinball Mini</title>
   <style>
@@ -53,16 +45,6 @@
     let gameOver = false;
     let gameStarted = false;
 
-//SPINNER
-    const spinner = {
-  x: width / 2,
-  y: height / 1.7,
-  length: 50,
-  thickness: 8,
-  angle: 0,
-  speed: 0.05
-};
-    
     const ball = {
       x: 150,
       y: 250,
@@ -105,6 +87,15 @@
       { x: 225, y: 190, radius: 15, lit: false, timer: null }
     ];
 
+    const spinner = {
+      x: canvas.width / 2,
+      y: 300,
+      length: 40,
+      thickness: 6,
+      angle: 0,
+      speed: 0.05
+    };
+
     function drawBall() {
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -132,6 +123,16 @@
       });
     }
 
+    function drawSpinner() {
+      ctx.save();
+      ctx.translate(spinner.x, spinner.y);
+      ctx.rotate(spinner.angle);
+      ctx.fillStyle = "#0f0";
+      ctx.fillRect(-spinner.length / 2, -spinner.thickness / 2, spinner.length, spinner.thickness);
+      ctx.fillRect(-spinner.thickness / 2, -spinner.length / 2, spinner.thickness, spinner.length);
+      ctx.restore();
+    }
+
     function drawHUD() {
       ctx.fillStyle = "#fff";
       ctx.font = "14px sans-serif";
@@ -153,6 +154,7 @@
       if (ball.y < ball.radius)
         ball.dy *= -1;
 
+      // Bumper collision
       bumpers.forEach(b => {
         const dx = ball.x - b.x;
         const dy = ball.y - b.y;
@@ -168,6 +170,18 @@
         }
       });
 
+      // Spinner collision
+      const dx = ball.x - spinner.x;
+      const dy = ball.y - spinner.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < spinner.length / 2 + ball.radius) {
+        const angle = Math.atan2(dy, dx);
+        ball.dx = Math.cos(angle) * 6;
+        ball.dy = Math.sin(angle) * 6;
+        score += 150;
+      }
+
+      // Flipper collision
       const flipperBounce = (f, isLeft) => {
         const dx = ball.x - f.x;
         const dy = ball.y - f.y;
@@ -210,31 +224,18 @@
         moveBall();
       }
 
+      spinner.angle += spinner.speed;
+
       drawBall();
       drawFlipper(flippers.left, true);
       drawFlipper(flippers.right, false);
       drawBumpers();
+      drawSpinner();
       drawHUD();
       updateFlippers();
 
       requestAnimationFrame(draw);
-  //SPINNER ANIMATION
-      drawSpinner();
-spinner.angle += spinner.speed;
     }
-
-    function drawSpinner() {
-  ctx.save();
-  ctx.translate(spinner.x, spinner.y);
-  ctx.rotate(spinner.angle);
-
-  ctx.fillStyle = 'cyan';
-  ctx.fillRect(-spinner.length / 2, -spinner.thickness / 2, spinner.length, spinner.thickness);
-  ctx.fillRect(-spinner.thickness / 2, -spinner.length / 2, spinner.thickness, spinner.length);
-
-  ctx.restore();
-}
-
 
     document.addEventListener("keydown", e => {
       if (!running) return;
