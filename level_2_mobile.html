@@ -1,63 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Pinball Mini</title>
-<style>
-
-<script>
-  // Spinner setup
-  const spinner = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    length: 80,
-    thickness: 6,
-    angle: 0,
-    speed: 0.1
-  };
-
-  function drawSpinner() {
-    ctx.save();
-    ctx.translate(spinner.x, spinner.y);
-    ctx.rotate(spinner.angle);
-    ctx.fillStyle = "#0f0";
-    ctx.fillRect(-spinner.length / 2, -spinner.thickness / 2, spinner.length, spinner.thickness);
-    ctx.restore();
-  }
-
-  function updateSpinner() {
-    spinner.angle += spinner.speed;
-    // Collision detection with ball
-    const dx = ball.x - spinner.x;
-    const dy = ball.y - spinner.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    if (dist < spinner.length / 2 + ball.radius && Math.abs(dy) < spinner.thickness * 2) {
-      const angle = Math.atan2(dy, dx);
-      ball.dx = Math.cos(angle) * 6;
-      ball.dy = Math.sin(angle) * 6;
-      score += 50;
-    }
-  }
-
-  // Modify draw() to include spinner
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (running) {
-      moveBall();
-      updateSpinner();
-    }
-    drawBall();
-    drawFlipper(flippers.left, true);
-    drawFlipper(flippers.right, false);
-    drawBumpers();
-    drawSpinner();
-    drawHUD();
-    updateFlippers();
-    requestAnimationFrame(draw);
-  }
-</script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <style>
     html, body {
       margin: 0;
       padding: 0;
@@ -133,9 +80,9 @@
     <button id="tiltRightBtn" class="btn">Tilt R</button>
     <button id="rightBtn" class="btn">Right</button>
   </div>
-  
+
   <script>
- const canvas = document.getElementById("game");
+    const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
 
@@ -164,7 +111,7 @@
       }
     };
 
-    const flipperGap = ball.radius * 8;
+    const flipperGap = ball.radius * 10;
     const flipperLength = (canvas.width - flipperGap) / 2;
 
     const flippers = {
@@ -200,7 +147,7 @@
       angle: 0,
       speed: 0.1
     };
-
+    
     function drawBall() {
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -259,7 +206,6 @@
       if (ball.y < ball.radius)
         ball.dy *= -1;
 
-      // Bumper collision
       bumpers.forEach(b => {
         const dx = ball.x - b.x;
         const dy = ball.y - b.y;
@@ -274,7 +220,7 @@
           b.timer = setTimeout(() => { b.lit = false; }, 200);
         }
       });
-
+  
       // Spinner collision
       const dx = ball.x - spinner.x;
       const dy = ball.y - spinner.y;
@@ -286,7 +232,6 @@
         score += 150;
       }
 
-      // Flipper collision
       const flipperBounce = (f, isLeft) => {
         const dx = ball.x - f.x;
         const dy = ball.y - f.y;
@@ -324,13 +269,8 @@
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (running) {
-        moveBall();
-      }
-
+      if (running) moveBall();
       spinner.angle += spinner.speed;
-
       drawBall();
       drawFlipper(flippers.left, true);
       drawFlipper(flippers.right, false);
@@ -338,11 +278,10 @@
       drawSpinner();
       drawHUD();
       updateFlippers();
-
       requestAnimationFrame(draw);
     }
 
-      startBtn.addEventListener("click", () => {
+    startBtn.addEventListener("click", () => {
       if (gameStarted) return;
       gameStarted = true;
       lives = 3;
@@ -353,7 +292,7 @@
       startBtn.style.display = "none";
     });
 
-     // Touch control bindings
+    // Touch control bindings
     leftBtn.addEventListener("touchstart", () => flippers.left.pressed = true);
     leftBtn.addEventListener("touchend", () => flippers.left.pressed = false);
 
