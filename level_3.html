@@ -4,7 +4,7 @@
 
 <script>
   if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-    window.location.href = "level_3_mobile.html";
+    window.location.href = "level_2_mobile.html";
   }
 </script>
   
@@ -227,23 +227,12 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function drawOutlines() {
-  ctx.fillStyle = "#800"; // Dark red for danger zones
-
-  // Left gutter (left side of left flipper)
-  ctx.fillRect(0, flippers.left.y - 20, flippers.left.x - flippers.left.width / 2, 40);
-
-  // Right gutter (right side of right flipper)
-  ctx.fillRect(flippers.right.x + flippers.right.width / 2, flippers.right.y - 20, canvas.width - (flippers.right.x + flippers.right.width / 2), 40);
-}
-      
       if (running) {
         moveBall();
       }
 
       spinner.angle += spinner.speed;
 
-      drawOutlines();
       drawBall();
       drawFlipper(flippers.left, true);
       drawFlipper(flippers.right, false);
