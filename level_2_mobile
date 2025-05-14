@@ -6,14 +6,6 @@
 <style>
 
 <script>
-  // Basic mobile device detection
-  if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-    window.location.href = "level_2_mobile.html";
-  }
-</script>
-  
-
-<script>
   // Spinner setup
   const spinner = {
     x: canvas.width / 2,
